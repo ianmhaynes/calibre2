@@ -1,6 +1,8 @@
 {
   "version": 2,
   "routes": [
+    { "src": "/api/checkout", "dest": "/api/checkout.js" },
+    { "src": "/api/verify", "dest": "/api/verify.js" },
     { "src": "/api/identify", "dest": "/api/identify.js" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
