@@ -101,6 +101,13 @@
   .detail-txt { font-size: 0.83rem; line-height: 1.8; color: var(--text); }
   .detail-txt p { margin-bottom: 10px; }
   .detail-txt strong { color: var(--cream); font-weight: 400; }
+  .section-title { font-size: 0.62rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin: 24px 0 14px; display: block; }
+  .value-box { background: rgba(201,168,76,0.05); border: 1px solid var(--gold-dim); border-radius: 2px; padding: 16px 20px; font-size: 0.83rem; line-height: 1.8; color: var(--text); margin-bottom: 8px; }
+  .similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .similar-cell { background: var(--panel); padding: 14px 16px; }
+  .similar-name { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--cream); margin-bottom: 4px; }
+  .similar-reason { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 6px; line-height: 1.5; }
+  .similar-price { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); }
 
   .btn-another { width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'Josefin Sans', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 16px; cursor: pointer; transition: all 0.3s; margin-bottom: 16px; display: none; }
   .btn-another.on { display: block; }
@@ -200,10 +207,18 @@
       <div class="specs-grid" id="specsGrid"></div>
       <div class="key-id" id="keyId"></div>
       <div class="detail-txt" id="detailTxt"></div>
+      <div id="valueSection" style="display:none">
+        <span class="section-title">Market Value & Collectibility</span>
+        <div class="value-box" id="valueInsight"></div>
+      </div>
+      <div id="similarSection" style="display:none">
+        <span class="section-title">Similar Watches</span>
+        <div class="similar-grid" id="similarGrid"></div>
+      </div>
     </div>
   </div>
 
-  <button class="btn-another" id="anotherBtn" onclick="startAnother()">Identify Another Movement — $5</button>
+  <button class="btn-another" id="anotherBtn" onclick="startAnother()">Identify Another Movement — $1</button>
 
   <footer>
     <p class="foot-txt">Calibre &nbsp;·&nbsp; Powered by Claude AI &nbsp;·&nbsp; For reference purposes only</p>
@@ -377,6 +392,25 @@
     if (r.found_in) html += `<p><strong>Found in:</strong> ${r.found_in}</p>`;
     if (r.confidence_reason) html += `<p><strong>Notes:</strong> ${r.confidence_reason}</p>`;
     document.getElementById('detailTxt').innerHTML = html;
+
+    // Value insight
+    if (r.value_insight) {
+      document.getElementById('valueInsight').textContent = r.value_insight;
+      document.getElementById('valueSection').style.display = '';
+    }
+
+    // Similar watches
+    if (r.similar_watches && r.similar_watches.length) {
+      document.getElementById('similarGrid').innerHTML = r.similar_watches.map(w =>
+        `<div class="similar-cell">
+          <div class="similar-name">${w.name}</div>
+          <div class="similar-reason">${w.reason}</div>
+          <div class="similar-price">${w.approx_price}</div>
+        </div>`
+      ).join('');
+      document.getElementById('similarSection').style.display = '';
+    }
+
     document.getElementById('result').classList.add('on');
     document.getElementById('inputSection').style.display = 'none';
     document.getElementById('anotherBtn').classList.add('on');
