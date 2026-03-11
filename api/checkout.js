@@ -1,5 +1,30 @@
+const Anthropic = require("@anthropic-ai/sdk");
 const Stripe = require("stripe");
+
+const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
 const stripe = new Stripe.default(process.env.STRIPE_SECRET_KEY);
+
+const SYSTEM_PROMPT = `You are a master horologist and watch movement expert with encyclopedic knowledge of mechanical, automatic, quartz, and electronic watch movements from all eras and manufacturers.
+
+When given an image of a watch movement, respond with ONLY a JSON object, no other text. Use this structure:
+{
+  "movement_name": "Full movement name",
+  "manufacturer": "Manufacturer name",
+  "type": "Automatic / Manual Wind / Quartz / etc.",
+  "confidence": "High / Medium / Low",
+  "confidence_reason": "Brief reason",
+  "specs": [
+    {"label": "Jewels", "value": "..."},
+    {"label": "Frequency", "value": "..."},
+    {"label": "Power Reserve", "value": "..."},
+    {"label": "Diameter", "value": "..."},
+    {"label": "Height", "value": "..."},
+    {"label": "Year Introduced", "value": "..."}
+  ],
+  "key_identification": "Most distinctive visual features",
+  "detailed_analysis": "3-4 sentences of expert analysis",
+  "found_in": "Notable watches using this calibre"
+}`;
 
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -9,28 +34,43 @@ module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const origin = req.headers.origin || `https://${req.headers.host}`;
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [{
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: "Calibre — Movement Identification",
-            description: "One expert AI-powered watch movement identification",
+    const { imageBase64, imageMediaType, paymentIntentId, isFree } = req.body;
+
+    if (!imageBase64) return res.status(400).json({ error: "No image provided." });
+
+    // Verify payment unless it's the free first use
+    if (!isFree) {
+      if (!paymentIntentId) return res.status(402).json({ error: "Payment required." });
+      const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      if (intent.status !== "succeeded") return res.status(402).json({ error: "Payment not completed." });
+      // Check it hasn't been used before
+      if (intent.metadata?.used === "true") return res.status(402).json({ error: "Payment already used." });
+      // Mark as used
+      await stripe.paymentIntents.update(paymentIntentId, { metadata: { used: "true" } });
+    }
+
+    const message = await anthropic.messages.create({
+      model: "claude-opus-4-5-20251101",
+      max_tokens: 1024,
+      system: SYSTEM_PROMPT,
+      messages: [{
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: { type: "base64", media_type: imageMediaType || "image/jpeg", data: imageBase64 }
           },
-          unit_amount: 500, // $5.00
-        },
-        quantity: 1,
-      }],
-      mode: "payment",
-      success_url: `${origin}/?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/`,
+          { type: "text", text: "Please identify this watch movement." }
+        ]
+      }]
     });
 
-    return res.status(200).json({ url: session.url, sessionId: session.id });
+    const text = message.content.filter(b => b.type === "text").map(b => b.text).join("");
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("No JSON in response");
+    return res.status(200).json(JSON.parse(jsonMatch[0]));
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message || "Server error" });
   }
 };
