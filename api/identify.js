@@ -23,7 +23,13 @@ When given an image of a watch movement, respond with ONLY a JSON object, no oth
   ],
   "key_identification": "Most distinctive visual features",
   "detailed_analysis": "3-4 sentences of expert analysis",
-  "found_in": "Notable watches using this calibre"
+  "found_in": "Notable watches using this calibre",
+  "value_insight": "2-3 sentences on the collectibility, desirability and approximate market value of watches containing this movement",
+  "similar_watches": [
+    {"name": "Watch name", "reason": "Why it is similar", "approx_price": "Price range"},
+    {"name": "Watch name", "reason": "Why it is similar", "approx_price": "Price range"},
+    {"name": "Watch name", "reason": "Why it is similar", "approx_price": "Price range"}
+  ]
 }`;
 
 module.exports = async function handler(req, res) {
@@ -48,13 +54,13 @@ module.exports = async function handler(req, res) {
 
     const message = await anthropic.messages.create({
       model: "claude-opus-4-5-20251101",
-      max_tokens: 1024,
+      max_tokens: 1500,
       system: SYSTEM_PROMPT,
       messages: [{
         role: "user",
         content: [
           { type: "image", source: { type: "base64", media_type: imageMediaType || "image/jpeg", data: imageBase64 } },
-          { type: "text", text: "Please identify this watch movement." }
+          { type: "text", text: "Please identify this watch movement and include value insights and similar watches." }
         ]
       }]
     });
