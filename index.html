@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,17 +16,23 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'Josefin Sans', sans-serif; font-weight: 300; min-height: 100vh; overflow-x: hidden; }
   body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.06) 0%, transparent 60%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 30h60M30 0v60' stroke='%232e2b24' stroke-width='0.4' opacity='0.5'/%3E%3C/svg%3E"); }
-  .wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+
+  .wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 24px 80px; }
+
   header { padding: 48px 0 0; text-align: center; }
   .logo-row { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 28px; }
   .ll { width: 48px; height: 1px; } .ll-l { background: linear-gradient(90deg, transparent, var(--gold)); } .ll-r { background: linear-gradient(90deg, var(--gold), transparent); }
   h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem,5vw,3.8rem); font-weight: 300; letter-spacing: 0.12em; color: var(--cream); line-height: 1; margin-bottom: 10px; }
   h1 .g { color: var(--gold); }
-  .tagline { font-size: 0.72rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 40px; }
+  .tagline { font-size: 0.72rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px; }
+  .free-badge { display: inline-block; font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 5px 14px; border: 1px solid var(--gold-dim); color: var(--gold); border-radius: 1px; margin-bottom: 36px; }
+
   .divider { display: flex; align-items: center; gap: 16px; margin: 0 0 36px; }
   .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
   .gem { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); }
-  .upload-zone { border: 1px solid var(--border); border-radius: 2px; padding: 48px 32px; text-align: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.3s; background: var(--surface); margin-bottom: 20px; }
+
+  /* Upload */
+  .upload-zone { border: 1px solid var(--border); border-radius: 2px; padding: 56px 32px; text-align: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.3s; background: var(--surface); margin-bottom: 24px; }
   .upload-zone::after { content: ''; position: absolute; inset: 0; background: var(--gold-glow); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
   .upload-zone:hover::after, .upload-zone.drag::after { opacity: 1; }
   .upload-zone:hover, .upload-zone.drag { border-color: var(--gold-dim); }
@@ -33,30 +40,50 @@
   .upload-zone.has-img::after { display: none; }
   .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
   .upload-zone.has-img input[type=file] { display: none; }
-  .upload-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--cream); margin: 14px 0 8px; letter-spacing: 0.05em; }
+  .upload-title { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--cream); margin: 16px 0 8px; letter-spacing: 0.05em; }
   .upload-sub { font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-dim); }
-  #preview { width: 100%; max-height: 420px; object-fit: contain; display: none; border-radius: 2px; }
+  #preview { width: 100%; max-height: 480px; object-fit: contain; display: none; border-radius: 2px; }
   #preview.on { display: block; }
-  .lbl { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 10px; }
-  textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; color: var(--text); font-family: 'Josefin Sans', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.04em; padding: 14px 16px; resize: vertical; min-height: 90px; transition: border-color 0.2s; outline: none; }
-  textarea:focus { border-color: var(--gold-dim); }
-  textarea::placeholder { color: var(--text-muted); }
-  .btn-identify { width: 100%; background: transparent; border: 1px solid var(--gold-dim); color: var(--gold); font-family: 'Josefin Sans', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 18px; cursor: pointer; transition: all 0.3s; margin: 20px 0 36px; }
+
+  .change-img { display: none; text-align: center; margin-bottom: 20px; }
+  .change-img.on { display: block; }
+  .change-img button { background: none; border: none; font-family: 'Josefin Sans', sans-serif; font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; padding: 8px; transition: color 0.2s; }
+  .change-img button:hover { color: var(--text-dim); }
+
+  /* Paywall */
+  .paywall { background: var(--panel); border: 1px solid var(--border); border-radius: 2px; padding: 36px 32px; text-align: center; margin-bottom: 24px; display: none; }
+  .paywall.on { display: block; }
+  .paywall-icon { margin-bottom: 16px; }
+  .paywall-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--cream); margin-bottom: 8px; }
+  .paywall-sub { font-size: 0.75rem; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 28px; line-height: 1.7; }
+  .price-tag { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; color: var(--gold); font-weight: 300; margin-bottom: 4px; }
+  .price-sub { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 28px; }
+  .btn-pay { background: transparent; border: 1px solid var(--gold-dim); color: var(--gold); font-family: 'Josefin Sans', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 16px 48px; cursor: pointer; transition: all 0.3s; }
+  .btn-pay:hover { border-color: var(--gold); background: var(--gold-glow); }
+  .btn-pay:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Identify button */
+  .btn-identify { width: 100%; background: transparent; border: 1px solid var(--gold-dim); color: var(--gold); font-family: 'Josefin Sans', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 18px; cursor: pointer; transition: all 0.3s; margin-bottom: 16px; display: none; }
+  .btn-identify.on { display: block; }
   .btn-identify:hover:not(:disabled) { border-color: var(--gold); background: var(--gold-glow); }
   .btn-identify:disabled { opacity: 0.4; cursor: not-allowed; }
-  .examples { text-align: center; margin-bottom: 36px; }
-  .ex-lbl { font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: block; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-  .chip { font-size: 0.68rem; letter-spacing: 0.12em; padding: 6px 14px; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: all 0.2s; border-radius: 1px; background: var(--surface); font-family: 'Josefin Sans', sans-serif; }
-  .chip:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow); }
+
+  .free-note { text-align: center; font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 36px; display: none; }
+  .free-note.on { display: block; }
+
+  /* Loading */
   .loading { text-align: center; padding: 48px 0; display: none; }
   .loading.on { display: block; }
   .spin { animation: spin 3s linear infinite; display: inline-block; margin-bottom: 18px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .load-txt { font-size: 0.65rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--text-dim); animation: pulse 1.5s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  /* Error */
   .error-box { background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.3); border-radius: 2px; padding: 18px 22px; margin-bottom: 20px; font-size: 0.8rem; color: #e07060; letter-spacing: 0.04em; display: none; }
   .error-box.on { display: block; }
+
+  /* Result */
   .result { background: var(--panel); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; animation: fadeUp 0.5s ease forwards; margin-bottom: 24px; display: none; }
   .result.on { display: block; }
   @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
@@ -74,12 +101,15 @@
   .detail-txt { font-size: 0.83rem; line-height: 1.8; color: var(--text); }
   .detail-txt p { margin-bottom: 10px; }
   .detail-txt strong { color: var(--cream); font-weight: 400; }
-  .btn-reset { background: none; border: none; font-family: 'Josefin Sans', sans-serif; font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; display: none; margin: 0 auto 20px; padding: 8px; transition: color 0.2s; }
-  .btn-reset:hover { color: var(--text-dim); }
-  .btn-reset.on { display: block; }
+
+  .btn-another { width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'Josefin Sans', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 16px; cursor: pointer; transition: all 0.3s; margin-bottom: 16px; display: none; }
+  .btn-another.on { display: block; }
+  .btn-another:hover { border-color: var(--gold-dim); color: var(--gold); }
+
   footer { text-align: center; padding: 28px 0; border-top: 1px solid var(--border); }
   .foot-txt { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); }
-  @media (max-width: 600px) { .specs-grid { grid-template-columns: 1fr 1fr; } }
+
+  @media (max-width: 600px) { .specs-grid { grid-template-columns: 1fr 1fr; } .paywall { padding: 28px 20px; } }
 </style>
 </head>
 <body>
@@ -102,6 +132,7 @@
     </div>
     <h1>CALIBR<span class="g">E</span></h1>
     <p class="tagline">Watch Movement Intelligence</p>
+    <div class="free-badge" id="freeBadge">First identification free</div>
   </header>
 
   <div class="divider"><div class="gem"></div></div>
@@ -109,33 +140,40 @@
   <div id="inputSection">
     <div class="upload-zone" id="uploadZone">
       <input type="file" id="fileInput" accept="image/*">
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-        <rect x="8" y="8" width="24" height="24" rx="1" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.6"/>
-        <path d="M20 25V15M15 20l5-5 5 5" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round"/>
-        <circle cx="20" cy="20" r="18" stroke="#3d3930" stroke-width="0.5"/>
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+        <rect x="9" y="9" width="26" height="26" rx="1" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.6"/>
+        <path d="M22 28V18M17 23l5-5 5 5" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round"/>
+        <circle cx="22" cy="22" r="20" stroke="#3d3930" stroke-width="0.5"/>
       </svg>
       <p class="upload-title">Upload Movement Image</p>
       <p class="upload-sub">Photograph · Caseback · Rotor · Full movement</p>
       <img id="preview" src="" alt="Preview">
     </div>
 
-    <div style="margin-bottom:20px">
-      <label class="lbl" for="desc">Or describe what you observe</label>
-      <textarea id="desc" placeholder="e.g. 26-jewel automatic with a blue rotor, côtes de Genève finishing, visible balance wheel..."></textarea>
+    <div class="change-img" id="changeImg">
+      <button onclick="changeImage()">↺ &nbsp; Change image</button>
     </div>
 
-    <button class="btn-identify" id="identifyBtn" onclick="identify()">Identify Movement</button>
-
-    <div class="examples">
-      <span class="ex-lbl">Quick descriptions to try</span>
-      <div class="chips">
-        <button class="chip" onclick="fill(this)">Skeleton movement, gothic bridges, 17 jewels</button>
-        <button class="chip" onclick="fill(this)">Small rotor, power reserve display, column wheel chronograph</button>
-        <button class="chip" onclick="fill(this)">Large balance wheel, blued screws, côtes de Genève, no rotor</button>
-        <button class="chip" onclick="fill(this)">High frequency 36000 bph, free-sprung balance, rhodium bridges</button>
-        <button class="chip" onclick="fill(this)">Micro-rotor, stamped plates, integrated bracelet movement</button>
+    <!-- Paywall -->
+    <div class="paywall" id="paywall">
+      <div class="paywall-icon">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="16" stroke="#c9a84c" stroke-width="0.8"/>
+          <rect x="11" y="17" width="14" height="10" rx="1" stroke="#c9a84c" stroke-width="1"/>
+          <path d="M13 17v-4a5 5 0 0 1 10 0v4" stroke="#c9a84c" stroke-width="1" stroke-linecap="round"/>
+          <circle cx="18" cy="22" r="1.5" fill="#c9a84c"/>
+        </svg>
       </div>
+      <h2 class="paywall-title">Continue Identifying</h2>
+      <p class="paywall-sub">You've used your free identification.<br>Each additional identification is just $5.</p>
+      <div class="price-tag">$5</div>
+      <div class="price-sub">Per identification · Instant · No subscription</div>
+      <button class="btn-pay" id="payBtn" onclick="startCheckout()">Pay & Identify →</button>
     </div>
+
+    <!-- Identify button (shown when free or paid) -->
+    <button class="btn-identify" id="identifyBtn" onclick="identify()">Identify Movement</button>
+    <div class="free-note" id="freeNote">✦ &nbsp; First identification complimentary</div>
   </div>
 
   <div class="loading" id="loading">
@@ -165,7 +203,7 @@
     </div>
   </div>
 
-  <button class="btn-reset" id="resetBtn" onclick="resetAll()">↺ &nbsp; New Identification</button>
+  <button class="btn-another" id="anotherBtn" onclick="startAnother()">Identify Another Movement — $5</button>
 
   <footer>
     <p class="foot-txt">Calibre &nbsp;·&nbsp; Powered by Claude AI &nbsp;·&nbsp; For reference purposes only</p>
@@ -174,9 +212,60 @@
 
 <script>
   let imageB64 = null, imageType = 'image/jpeg';
+  let pendingPaymentIntentId = null;
+
   const zone = document.getElementById('uploadZone');
   const fileInput = document.getElementById('fileInput');
   const preview = document.getElementById('preview');
+
+  // Check if returning from Stripe payment
+  window.addEventListener('load', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    if (sessionId) {
+      history.replaceState({}, '', '/');
+      document.getElementById('loading').classList.add('on');
+      try {
+        const res = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        });
+        const data = await res.json();
+        if (data.paid) {
+          pendingPaymentIntentId = data.paymentIntentId;
+          document.getElementById('loading').classList.remove('on');
+          showUploadState();
+          document.getElementById('identifyBtn').classList.add('on');
+          document.getElementById('freeNote').classList.remove('on');
+          document.getElementById('freeBadge').style.display = 'none';
+          showErr('', false);
+          // Show a brief confirmation
+          const note = document.getElementById('freeNote');
+          note.textContent = '✦  Payment confirmed — upload your image to identify';
+          note.classList.add('on');
+        }
+      } catch(e) {
+        document.getElementById('loading').classList.remove('on');
+      }
+    } else {
+      updateUI();
+    }
+  });
+
+  function hasUsedFree() {
+    return localStorage.getItem('calibre_used_free') === 'true';
+  }
+
+  function updateUI() {
+    if (!hasUsedFree()) {
+      document.getElementById('identifyBtn').classList.add('on');
+      document.getElementById('freeNote').classList.add('on');
+      document.getElementById('freeBadge').style.display = '';
+    } else {
+      document.getElementById('freeBadge').style.display = 'none';
+    }
+  }
 
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
@@ -195,32 +284,79 @@
       zone.querySelector('svg').style.display = 'none';
       zone.querySelector('.upload-title').style.display = 'none';
       zone.querySelector('.upload-sub').style.display = 'none';
+      document.getElementById('changeImg').classList.add('on');
+
+      // Show paywall or identify button
+      if (hasUsedFree() && !pendingPaymentIntentId) {
+        document.getElementById('paywall').classList.add('on');
+        document.getElementById('identifyBtn').classList.remove('on');
+        document.getElementById('freeNote').classList.remove('on');
+      }
     };
     r.readAsDataURL(file);
   }
 
-  function fill(el) { document.getElementById('desc').value = el.textContent.trim(); }
+  function changeImage() {
+    imageB64 = null;
+    preview.src = ''; preview.classList.remove('on');
+    zone.classList.remove('has-img');
+    zone.querySelector('svg').style.display = '';
+    zone.querySelector('.upload-title').style.display = '';
+    zone.querySelector('.upload-sub').style.display = '';
+    document.getElementById('changeImg').classList.remove('on');
+    document.getElementById('paywall').classList.remove('on');
+    fileInput.value = '';
+    updateUI();
+  }
+
+  async function startCheckout() {
+    if (!imageB64) { showErr('Please upload an image first.'); return; }
+    const btn = document.getElementById('payBtn');
+    btn.disabled = true;
+    btn.textContent = 'Redirecting…';
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else throw new Error(data.error);
+    } catch(e) {
+      showErr('Checkout failed: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = 'Pay & Identify →';
+    }
+  }
 
   async function identify() {
-    const desc = document.getElementById('desc').value.trim();
-    if (!imageB64 && !desc) { showErr('Please upload an image or describe the movement.'); return; }
+    if (!imageB64) { showErr('Please upload an image first.'); return; }
 
+    const isFree = !hasUsedFree();
     const btn = document.getElementById('identifyBtn');
     btn.disabled = true;
     document.getElementById('loading').classList.add('on');
-    document.getElementById('result').classList.remove('on');
     document.getElementById('errBox').classList.remove('on');
 
     try {
       const res = await fetch('/api/identify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: desc, imageBase64: imageB64, imageMediaType: imageType })
+        body: JSON.stringify({
+          imageBase64: imageB64,
+          imageMediaType: imageType,
+          isFree,
+          paymentIntentId: pendingPaymentIntentId || null
+        })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
+
+      if (isFree) localStorage.setItem('calibre_used_free', 'true');
+      pendingPaymentIntentId = null;
       showResult(data);
-    } catch (e) {
+    } catch(e) {
       showErr('Analysis failed: ' + e.message);
     } finally {
       document.getElementById('loading').classList.remove('on');
@@ -243,27 +379,41 @@
     document.getElementById('detailTxt').innerHTML = html;
     document.getElementById('result').classList.add('on');
     document.getElementById('inputSection').style.display = 'none';
-    document.getElementById('resetBtn').classList.add('on');
+    document.getElementById('anotherBtn').classList.add('on');
+    document.getElementById('freeBadge').style.display = 'none';
   }
 
-  function showErr(msg) {
-    const el = document.getElementById('errBox');
-    el.textContent = msg; el.classList.add('on');
-  }
-
-  function resetAll() {
-    imageB64 = null;
+  function startAnother() {
+    imageB64 = null; pendingPaymentIntentId = null;
     preview.src = ''; preview.classList.remove('on');
     zone.classList.remove('has-img');
     zone.querySelector('svg').style.display = '';
     zone.querySelector('.upload-title').style.display = '';
     zone.querySelector('.upload-sub').style.display = '';
-    fileInput.value = '';
-    document.getElementById('desc').value = '';
+    document.getElementById('changeImg').classList.remove('on');
     document.getElementById('result').classList.remove('on');
+    document.getElementById('anotherBtn').classList.remove('on');
     document.getElementById('errBox').classList.remove('on');
-    document.getElementById('resetBtn').classList.remove('on');
     document.getElementById('inputSection').style.display = '';
+    document.getElementById('paywall').classList.remove('on');
+    document.getElementById('identifyBtn').classList.remove('on');
+    document.getElementById('freeNote').classList.remove('on');
+    document.getElementById('freeBadge').style.display = 'none';
+    fileInput.value = '';
+    // Always show paywall for subsequent identifications
+    updateUI();
+  }
+
+  function showUploadState() {
+    document.getElementById('inputSection').style.display = '';
+    document.getElementById('result').classList.remove('on');
+    document.getElementById('anotherBtn').classList.remove('on');
+  }
+
+  function showErr(msg, show = true) {
+    const el = document.getElementById('errBox');
+    if (show && msg) { el.textContent = msg; el.classList.add('on'); }
+    else el.classList.remove('on');
   }
 </script>
 </body>
