@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calibre — Watch Movement Identifier</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0d0b; --surface: #151410; --panel: #1a1915;
+    --border: #2e2b24; --border-light: #3d3930;
+    --gold: #c9a84c; --gold-dim: #8a6f2e; --gold-glow: rgba(201,168,76,0.12);
+    --cream: #f0e8d0; --text: #d4c9a8; --text-dim: #7a7060; --text-muted: #4a4538;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Josefin Sans', sans-serif; font-weight: 300; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.06) 0%, transparent 60%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 30h60M30 0v60' stroke='%232e2b24' stroke-width='0.4' opacity='0.5'/%3E%3C/svg%3E"); }
+  .wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+  header { padding: 48px 0 0; text-align: center; }
+  .logo-row { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .ll { width: 48px; height: 1px; } .ll-l { background: linear-gradient(90deg, transparent, var(--gold)); } .ll-r { background: linear-gradient(90deg, var(--gold), transparent); }
+  h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem,5vw,3.8rem); font-weight: 300; letter-spacing: 0.12em; color: var(--cream); line-height: 1; margin-bottom: 10px; }
+  h1 .g { color: var(--gold); }
+  .tagline { font-size: 0.72rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 40px; }
+  .divider { display: flex; align-items: center; gap: 16px; margin: 0 0 36px; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .gem { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); }
+  .upload-zone { border: 1px solid var(--border); border-radius: 2px; padding: 48px 32px; text-align: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.3s; background: var(--surface); margin-bottom: 20px; }
+  .upload-zone::after { content: ''; position: absolute; inset: 0; background: var(--gold-glow); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .upload-zone:hover::after, .upload-zone.drag::after { opacity: 1; }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--gold-dim); }
+  .upload-zone.has-img { padding: 0; border-color: var(--gold-dim); }
+  .upload-zone.has-img::after { display: none; }
+  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-zone.has-img input[type=file] { display: none; }
+  .upload-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--cream); margin: 14px 0 8px; letter-spacing: 0.05em; }
+  .upload-sub { font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-dim); }
+  #preview { width: 100%; max-height: 420px; object-fit: contain; display: none; border-radius: 2px; }
+  #preview.on { display: block; }
+  .lbl { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 10px; }
+  textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; color: var(--text); font-family: 'Josefin Sans', sans-serif; font-size: 0.85rem; font-weight: 300; letter-spacing: 0.04em; padding: 14px 16px; resize: vertical; min-height: 90px; transition: border-color 0.2s; outline: none; }
+  textarea:focus { border-color: var(--gold-dim); }
+  textarea::placeholder { color: var(--text-muted); }
+  .btn-identify { width: 100%; background: transparent; border: 1px solid var(--gold-dim); color: var(--gold); font-family: 'Josefin Sans', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 18px; cursor: pointer; transition: all 0.3s; margin: 20px 0 36px; }
+  .btn-identify:hover:not(:disabled) { border-color: var(--gold); background: var(--gold-glow); }
+  .btn-identify:disabled { opacity: 0.4; cursor: not-allowed; }
+  .examples { text-align: center; margin-bottom: 36px; }
+  .ex-lbl { font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: block; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .chip { font-size: 0.68rem; letter-spacing: 0.12em; padding: 6px 14px; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: all 0.2s; border-radius: 1px; background: var(--surface); font-family: 'Josefin Sans', sans-serif; }
+  .chip:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow); }
+  .loading { text-align: center; padding: 48px 0; display: none; }
+  .loading.on { display: block; }
+  .spin { animation: spin 3s linear infinite; display: inline-block; margin-bottom: 18px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .load-txt { font-size: 0.65rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--text-dim); animation: pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+  .error-box { background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.3); border-radius: 2px; padding: 18px 22px; margin-bottom: 20px; font-size: 0.8rem; color: #e07060; letter-spacing: 0.04em; display: none; }
+  .error-box.on { display: block; }
+  .result { background: var(--panel); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; animation: fadeUp 0.5s ease forwards; margin-bottom: 24px; display: none; }
+  .result.on { display: block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .result-hdr { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border); background: rgba(201,168,76,0.04); }
+  .result-hdr-lbl { font-size: 0.65rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); }
+  .badge { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--border-light); color: var(--text-dim); border-radius: 1px; }
+  .result-body { padding: 28px 24px; }
+  .mv-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.6rem,3vw,2.4rem); font-weight: 400; color: var(--cream); letter-spacing: 0.04em; margin-bottom: 6px; line-height: 1.1; }
+  .mv-sub { font-size: 0.72rem; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 24px; }
+  .specs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 22px; }
+  .spec-cell { background: var(--panel); padding: 13px 15px; }
+  .spec-lbl { font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; display: block; }
+  .spec-val { font-size: 0.82rem; color: var(--cream); }
+  .key-id { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 300; line-height: 1.75; color: var(--text); font-style: italic; padding: 18px 20px; border-left: 2px solid var(--gold-dim); background: rgba(201,168,76,0.03); margin-bottom: 18px; }
+  .detail-txt { font-size: 0.83rem; line-height: 1.8; color: var(--text); }
+  .detail-txt p { margin-bottom: 10px; }
+  .detail-txt strong { color: var(--cream); font-weight: 400; }
+  .btn-reset { background: none; border: none; font-family: 'Josefin Sans', sans-serif; font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; display: none; margin: 0 auto 20px; padding: 8px; transition: color 0.2s; }
+  .btn-reset:hover { color: var(--text-dim); }
+  .btn-reset.on { display: block; }
+  footer { text-align: center; padding: 28px 0; border-top: 1px solid var(--border); }
+  .foot-txt { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); }
+  @media (max-width: 600px) { .specs-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-row">
+      <div class="ll ll-l"></div>
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="14" stroke="#c9a84c" stroke-width="1"/>
+        <circle cx="16" cy="16" r="8" stroke="#c9a84c" stroke-width="0.8"/>
+        <circle cx="16" cy="16" r="2" fill="#c9a84c"/>
+        <line x1="16" y1="2" x2="16" y2="6" stroke="#c9a84c" stroke-width="1"/>
+        <line x1="16" y1="26" x2="16" y2="30" stroke="#c9a84c" stroke-width="1"/>
+        <line x1="2" y1="16" x2="6" y2="16" stroke="#c9a84c" stroke-width="1"/>
+        <line x1="26" y1="16" x2="30" y2="16" stroke="#c9a84c" stroke-width="1"/>
+        <line x1="16" y1="8" x2="16" y2="14" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="16" y1="16" x2="21" y2="16" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <div class="ll ll-r"></div>
+    </div>
+    <h1>CALIBR<span class="g">E</span></h1>
+    <p class="tagline">Watch Movement Intelligence</p>
+  </header>
+
+  <div class="divider"><div class="gem"></div></div>
+
+  <div id="inputSection">
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <rect x="8" y="8" width="24" height="24" rx="1" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.6"/>
+        <path d="M20 25V15M15 20l5-5 5 5" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="18" stroke="#3d3930" stroke-width="0.5"/>
+      </svg>
+      <p class="upload-title">Upload Movement Image</p>
+      <p class="upload-sub">Photograph · Caseback · Rotor · Full movement</p>
+      <img id="preview" src="" alt="Preview">
+    </div>
+
+    <div style="margin-bottom:20px">
+      <label class="lbl" for="desc">Or describe what you observe</label>
+      <textarea id="desc" placeholder="e.g. 26-jewel automatic with a blue rotor, côtes de Genève finishing, visible balance wheel..."></textarea>
+    </div>
+
+    <button class="btn-identify" id="identifyBtn" onclick="identify()">Identify Movement</button>
+
+    <div class="examples">
+      <span class="ex-lbl">Quick descriptions to try</span>
+      <div class="chips">
+        <button class="chip" onclick="fill(this)">Skeleton movement, gothic bridges, 17 jewels</button>
+        <button class="chip" onclick="fill(this)">Small rotor, power reserve display, column wheel chronograph</button>
+        <button class="chip" onclick="fill(this)">Large balance wheel, blued screws, côtes de Genève, no rotor</button>
+        <button class="chip" onclick="fill(this)">High frequency 36000 bph, free-sprung balance, rhodium bridges</button>
+        <button class="chip" onclick="fill(this)">Micro-rotor, stamped plates, integrated bracelet movement</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spin">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <path d="M24 4 L27 9 L33 7 L35 12 L41 12 L41 18 L46 20 L44 26 L48 30 L43 33 L44 39 L38 40 L36 45 L30 43 L27 48 L22 44 L17 47 L15 42 L9 41 L8 35 L3 33 L5 27 L0 24 L4 20 L2 14 L8 12 L10 7 L16 9 Z" stroke="#c9a84c" stroke-width="0.8" fill="rgba(201,168,76,0.05)"/>
+        <circle cx="24" cy="24" r="8" stroke="#c9a84c" stroke-width="0.8"/>
+        <circle cx="24" cy="24" r="3" fill="#c9a84c" opacity="0.5"/>
+      </svg>
+    </div>
+    <p class="load-txt">Consulting the archives…</p>
+  </div>
+
+  <div class="error-box" id="errBox"></div>
+
+  <div class="result" id="result">
+    <div class="result-hdr">
+      <span class="result-hdr-lbl">Movement Identification</span>
+      <span class="badge" id="badge">—</span>
+    </div>
+    <div class="result-body">
+      <h2 class="mv-name" id="mvName">—</h2>
+      <p class="mv-sub" id="mvSub">—</p>
+      <div class="specs-grid" id="specsGrid"></div>
+      <div class="key-id" id="keyId"></div>
+      <div class="detail-txt" id="detailTxt"></div>
+    </div>
+  </div>
+
+  <button class="btn-reset" id="resetBtn" onclick="resetAll()">↺ &nbsp; New Identification</button>
+
+  <footer>
+    <p class="foot-txt">Calibre &nbsp;·&nbsp; Powered by Claude AI &nbsp;·&nbsp; For reference purposes only</p>
+  </footer>
+</div>
+
+<script>
+  let imageB64 = null, imageType = 'image/jpeg';
+  const zone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+  const preview = document.getElementById('preview');
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); loadImg(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImg(e.target.files[0]); });
+
+  function loadImg(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    imageType = file.type;
+    const r = new FileReader();
+    r.onload = e => {
+      imageB64 = e.target.result.split(',')[1];
+      preview.src = e.target.result;
+      preview.classList.add('on');
+      zone.classList.add('has-img');
+      zone.querySelector('svg').style.display = 'none';
+      zone.querySelector('.upload-title').style.display = 'none';
+      zone.querySelector('.upload-sub').style.display = 'none';
+    };
+    r.readAsDataURL(file);
+  }
+
+  function fill(el) { document.getElementById('desc').value = el.textContent.trim(); }
+
+  async function identify() {
+    const desc = document.getElementById('desc').value.trim();
+    if (!imageB64 && !desc) { showErr('Please upload an image or describe the movement.'); return; }
+
+    const btn = document.getElementById('identifyBtn');
+    btn.disabled = true;
+    document.getElementById('loading').classList.add('on');
+    document.getElementById('result').classList.remove('on');
+    document.getElementById('errBox').classList.remove('on');
+
+    try {
+      const res = await fetch('/api/identify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: desc, imageBase64: imageB64, imageMediaType: imageType })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      showResult(data);
+    } catch (e) {
+      showErr('Analysis failed: ' + e.message);
+    } finally {
+      document.getElementById('loading').classList.remove('on');
+      btn.disabled = false;
+    }
+  }
+
+  function showResult(r) {
+    document.getElementById('mvName').textContent = r.movement_name || 'Unknown Calibre';
+    document.getElementById('mvSub').textContent = [r.manufacturer, r.type].filter(Boolean).join(' · ');
+    document.getElementById('badge').textContent = (r.confidence || '—') + ' Confidence';
+    document.getElementById('keyId').textContent = r.key_identification || '';
+    document.getElementById('specsGrid').innerHTML = (r.specs || []).map(s =>
+      `<div class="spec-cell"><span class="spec-lbl">${s.label}</span><span class="spec-val">${s.value || '—'}</span></div>`
+    ).join('');
+    let html = '';
+    if (r.detailed_analysis) html += `<p>${r.detailed_analysis}</p>`;
+    if (r.found_in) html += `<p><strong>Found in:</strong> ${r.found_in}</p>`;
+    if (r.confidence_reason) html += `<p><strong>Notes:</strong> ${r.confidence_reason}</p>`;
+    document.getElementById('detailTxt').innerHTML = html;
+    document.getElementById('result').classList.add('on');
+    document.getElementById('inputSection').style.display = 'none';
+    document.getElementById('resetBtn').classList.add('on');
+  }
+
+  function showErr(msg) {
+    const el = document.getElementById('errBox');
+    el.textContent = msg; el.classList.add('on');
+  }
+
+  function resetAll() {
+    imageB64 = null;
+    preview.src = ''; preview.classList.remove('on');
+    zone.classList.remove('has-img');
+    zone.querySelector('svg').style.display = '';
+    zone.querySelector('.upload-title').style.display = '';
+    zone.querySelector('.upload-sub').style.display = '';
+    fileInput.value = '';
+    document.getElementById('desc').value = '';
+    document.getElementById('result').classList.remove('on');
+    document.getElementById('errBox').classList.remove('on');
+    document.getElementById('resetBtn').classList.remove('on');
+    document.getElementById('inputSection').style.display = '';
+  }
+</script>
+</body>
+</html>
