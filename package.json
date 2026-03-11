@@ -1,7 +1,6 @@
-{
-  "name": "calibre",
-  "version": "1.0.0",
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.20.0"
-  }
-}
+	
+name	"calibre"
+version	"1.0.0"
+dependencies	
+@anthropic-ai/sdk	"^0.20.0"
+stripe	"^14.0.0"
