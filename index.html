@@ -203,7 +203,7 @@ footer{text-align:center;padding:40px 32px;border-top:1px solid var(--border);po
   <div class="home-features">
     <div class="feat"><div class="feat-num">01</div><h3 class="feat-title">Expert Identification</h3><p class="feat-txt">Trained on thousands of movements across every major manufacturer — from ETA to Patek Philippe, Valjoux to FP Journe. Mechanical, automatic, quartz and more.</p></div>
     <div class="feat"><div class="feat-num">02</div><h3 class="feat-title">Full Specifications</h3><p class="feat-txt">Jewel count, frequency, power reserve, dimensions, year of introduction and the notable references that house the calibre — all in seconds.</p></div>
-    <div class="feat"><div class="feat-num">03</div><h3 class="feat-title">Market Intelligence</h3><p class="feat-txt">Understand the collectibility and value of the movement, plus discover similar watches linked directly to live Chrono24 listings.</p></div>
+    <div class="feat"><div class="feat-num">03</div><h3 class="feat-title">Market Intelligence</h3><p class="feat-txt">Understand the collectibility and value of the movement, plus discover similar watches linked directly to Google search results.</p></div>
   </div>
   <div class="home-how">
     <p class="section-eyebrow">How It Works</p>
@@ -211,7 +211,7 @@ footer{text-align:center;padding:40px 32px;border-top:1px solid var(--border);po
     <div class="steps">
       <div class="step"><p class="step-n">Step 01</p><h4 class="step-t">Photograph the Movement</h4><p class="step-d">Upload a clear image of the movement. Add optional caseback or dial photos for greater accuracy.</p></div>
       <div class="step"><p class="step-n">Step 02</p><h4 class="step-t">AI Analysis</h4><p class="step-d">Our model cross-references visual signatures, plate architecture, and finishing against its horological knowledge base.</p></div>
-      <div class="step"><p class="step-n">Step 03</p><h4 class="step-t">Full Report</h4><p class="step-d">Receive the calibre name, specifications, value insight, and similar watches with live Chrono24 links.</p></div>
+      <div class="step"><p class="step-n">Step 03</p><h4 class="step-t">Full Report</h4><p class="step-d">Receive the calibre name, specifications, value insight, and similar watches with Google search links.</p></div>
     </div>
   </div>
   <div class="home-cta-band">
@@ -282,7 +282,7 @@ footer{text-align:center;padding:40px 32px;border-top:1px solid var(--border);po
         <div class="key-id" id="keyId"></div>
         <div class="detail-txt" id="detailTxt"></div>
         <div id="valueSection" style="display:none"><span class="res-section-lbl">Market Value &amp; Collectibility</span><div class="value-box" id="valueInsight"></div></div>
-        <div id="similarSection" style="display:none"><span class="res-section-lbl">Similar Watches — Search on Chrono24</span><div class="similar-grid" id="similarGrid"></div></div>
+        <div id="similarSection" style="display:none"><span class="res-section-lbl">Similar Watches — Click to Search Google</span><div class="similar-grid" id="similarGrid"></div></div>
       </div>
     </div>
     <button class="btn-another" id="anotherBtn" onclick="startAnother()">Identify Another Movement — $5</button>
@@ -346,7 +346,7 @@ footer{text-align:center;padding:40px 32px;border-top:1px solid var(--border);po
           <li>Technical specifications</li>
           <li>Key identification features</li>
           <li>Market value insight</li>
-          <li>Similar watches on Chrono24</li>
+          <li>Similar watches via Google search</li>
         </ul>
         <button class="plan-cta" onclick="showPage('identifier')">Get Started Free →</button>
       </div>
@@ -361,7 +361,7 @@ footer{text-align:center;padding:40px 32px;border-top:1px solid var(--border);po
           <li>Up to 3 images per identification</li>
           <li>Movement + caseback + dial analysis</li>
           <li>Higher accuracy from multiple views</li>
-          <li>Instant Chrono24 watch links</li>
+          <li>Instant Google search links</li>
         </ul>
         <button class="plan-cta" onclick="showPage('identifier')">Identify a Movement →</button>
       </div>
@@ -374,7 +374,7 @@ footer{text-align:center;padding:40px 32px;border-top:1px solid var(--border);po
     <div class="divider" style="margin:24px 0;"><div class="gem"></div></div>
     <div class="faq-item"><p class="faq-q">Is my first identification really free?</p><p class="faq-a">Yes. No account, no credit card. Upload your movement image and receive a full report immediately. After your first identification, each subsequent report is $5, charged securely through Stripe.</p></div>
     <div class="divider" style="margin:24px 0;"><div class="gem"></div></div>
-    <div class="faq-item"><p class="faq-q">What are the Chrono24 links?</p><p class="faq-a">After identification, we suggest three similar watches with links directly to Chrono24 search results, so you can explore live listings and current market prices for comparable pieces.</p></div>
+    <div class="faq-item"><p class="faq-q">What are the similar watch links?</p><p class="faq-a">After identification, we suggest three similar watches with links to Google search, so you can explore listings and current market prices for comparable pieces.</p></div>
     <div style="text-align:center;padding:60px 0 0;">
       <button class="btn-primary" onclick="showPage('identifier')">Identify Your First Movement Free →</button>
     </div>
@@ -506,7 +506,7 @@ async function identify(){
   finally{document.getElementById('loading').classList.remove('on');btn.disabled=false;}
 }
 
-function c24(name){return'https://www.chrono24.com/search/index.htm?query='+encodeURIComponent(name);}
+function c24(name){return'https://www.google.com/search?q='+encodeURIComponent(name+' watch buy');}
 
 function showResult(r){
   document.getElementById('mvName').textContent=r.movement_name||'Unknown Calibre';
@@ -526,7 +526,7 @@ function showResult(r){
         <div class="similar-name">${w.name}</div>
         <div class="similar-reason">${w.reason}</div>
         <div class="similar-price">${w.approx_price}</div>
-        <div class="similar-hint">Search on Chrono24 ↗</div>
+        <div class="similar-hint">Search Google ↗</div>
       </a>`).join('');
     document.getElementById('similarSection').style.display='';
   }
