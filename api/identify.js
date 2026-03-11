@@ -1,10 +1,12 @@
 const Anthropic = require("@anthropic-ai/sdk");
+const Stripe = require("stripe");
 
-const client = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
+const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
+const stripe = new Stripe.default(process.env.STRIPE_SECRET_KEY);
 
 const SYSTEM_PROMPT = `You are a master horologist and watch movement expert with encyclopedic knowledge of mechanical, automatic, quartz, and electronic watch movements from all eras and manufacturers.
 
-When given an image or description of a watch movement, respond with ONLY a JSON object, no other text. Use this structure:
+When given an image of a watch movement, respond with ONLY a JSON object, no other text. Use this structure:
 {
   "movement_name": "Full movement name",
   "manufacturer": "Manufacturer name",
@@ -28,53 +30,39 @@ module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const { description, imageBase64, imageMediaType } = req.body;
+    const { imageBase64, imageMediaType, paymentIntentId, isFree } = req.body;
 
-    if (!description && !imageBase64) {
-      return res.status(400).json({ error: "Provide an image or description." });
+    if (!imageBase64) return res.status(400).json({ error: "No image provided." });
+
+    if (!isFree) {
+      if (!paymentIntentId) return res.status(402).json({ error: "Payment required." });
+      const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      if (intent.status !== "succeeded") return res.status(402).json({ error: "Payment not completed." });
+      if (intent.metadata?.used === "true") return res.status(402).json({ error: "Payment already used." });
+      await stripe.paymentIntents.update(paymentIntentId, { metadata: { used: "true" } });
     }
 
-    let content;
-    if (imageBase64) {
-      content = [
-        {
-          type: "image",
-          source: {
-            type: "base64",
-            media_type: imageMediaType || "image/jpeg",
-            data: imageBase64,
-          },
-        },
-        {
-          type: "text",
-          text: description?.trim() ? `Additional description: ${description}` : "Please identify this watch movement.",
-        },
-      ];
-    } else {
-      content = `Please identify this watch movement: ${description}`;
-    }
-
-    const message = await client.messages.create({
+    const message = await anthropic.messages.create({
       model: "claude-opus-4-5-20251101",
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content }],
+      messages: [{
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: imageMediaType || "image/jpeg", data: imageBase64 } },
+          { type: "text", text: "Please identify this watch movement." }
+        ]
+      }]
     });
 
-    const text = message.content
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("");
-
+    const text = message.content.filter(b => b.type === "text").map(b => b.text).join("");
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("No JSON in response");
-    const result = JSON.parse(jsonMatch[0]);
-    return res.status(200).json(result);
+    return res.status(200).json(JSON.parse(jsonMatch[0]));
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: err.message || "Server error" });
